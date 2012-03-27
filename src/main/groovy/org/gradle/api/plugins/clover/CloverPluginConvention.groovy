@@ -15,6 +15,7 @@
  */
 package org.gradle.api.plugins.clover
 
+import org.gradle.api.tasks.SourceSet
 import org.gradle.util.ConfigureUtil
 
 /**
@@ -28,8 +29,8 @@ class CloverPluginConvention {
     String licenseLocation
     String initString
     String targetPercentage
-    Set<File> additionalSourceDirs
-    Set<File> additionalTestDirs
+    Set<SourceSet> additionalSourceSets
+    Set<SourceSet> additionalTestSourceSets
     List<String> includes
     List<String> excludes
     List<String> testIncludes
