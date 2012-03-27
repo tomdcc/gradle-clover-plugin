@@ -15,7 +15,6 @@
  */
 package org.gradle.api.plugins.clover
 
-import org.gradle.api.tasks.SourceSet
 import org.gradle.util.ConfigureUtil
 
 /**
@@ -29,8 +28,8 @@ class CloverPluginConvention {
     String licenseLocation
     String initString
     String targetPercentage
-    Set<SourceSet> additionalSourceSets
-    Set<SourceSet> additionalTestSourceSets
+    List<CloverSourceSet> additionalSourceSets = []
+    List<CloverSourceSet> additionalTestSourceSets =[]
     List<String> includes
     List<String> excludes
     List<String> testIncludes
@@ -58,6 +57,22 @@ class CloverPluginConvention {
         CloverContextConvention methodContext = new CloverContextConvention()
         closure.delegate = methodContext
         contexts.methods << methodContext
+        closure()
+    }
+
+    def additionalSourceSet(Closure closure) {
+        closure.resolveStrategy = Closure.DELEGATE_FIRST
+        CloverSourceSet additionalSourceSet = new CloverSourceSet()
+        closure.delegate = additionalSourceSet
+        additionalSourceSets << additionalSourceSet
+        closure()
+    }
+
+    def additionalTestSourceSet(Closure closure) {
+        closure.resolveStrategy = Closure.DELEGATE_FIRST
+        CloverSourceSet additionalTestSourceSet = new CloverSourceSet()
+        closure.delegate = additionalTestSourceSet
+        additionalTestSourceSets << additionalTestSourceSet
         closure()
     }
 

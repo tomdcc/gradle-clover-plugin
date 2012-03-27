@@ -173,7 +173,7 @@ class CloverPlugin implements Plugin<Project> {
     }
 
     private Set<CloverSourceSet> getSourceSets(Project project, CloverPluginConvention cloverPluginConvention) {
-        def cloverSourceSets = []
+        def sourceSets = []
 
         if(hasGroovyPlugin(project)) {
             CloverSourceSet cloverSourceSet = new CloverSourceSet()
@@ -181,31 +181,28 @@ class CloverPlugin implements Plugin<Project> {
             cloverSourceSet.srcDirs.addAll(filterNonExistentDirectories(project.sourceSets.main.groovy.srcDirs))
             cloverSourceSet.classesDir = project.sourceSets.main.output.classesDir
             cloverSourceSet.backupDir = cloverPluginConvention.classesBackupDir ?: new File("${project.sourceSets.main.output.classesDir}-bak")
-            cloverSourceSets << cloverSourceSet
+            sourceSets << cloverSourceSet
         }
         else if(hasJavaPlugin(project)) {
             CloverSourceSet cloverSourceSet = new CloverSourceSet()
             cloverSourceSet.srcDirs.addAll(filterNonExistentDirectories(project.sourceSets.main.java.srcDirs))
             cloverSourceSet.classesDir = project.sourceSets.main.output.classesDir
             cloverSourceSet.backupDir = cloverPluginConvention.classesBackupDir ?: new File("${project.sourceSets.main.output.classesDir}-bak")
-            cloverSourceSets << cloverSourceSet
+            sourceSets << cloverSourceSet
         }
 
         if(cloverPluginConvention.additionalSourceSets) {
-            cloverPluginConvention.additionalSourceSets.each {
-                CloverSourceSet cloverSourceSet = new CloverSourceSet()
-                cloverSourceSet.srcDirs.addAll(filterNonExistentDirectories(it.srcDirs))
-                cloverSourceSet.classesDir = it.output.classesDir
-                cloverSourceSet.backupDir = cloverPluginConvention.classesBackupDir ?: new File("${it.output.classesDir}-bak")
-                cloverSourceSets << cloverSourceSet
+            cloverPluginConvention.additionalSourceSets.each { additionalSourceSet ->
+                additionalSourceSet.backupDir = cloverPluginConvention.classesBackupDir ?: new File("${additionalSourceSet.classesDir}-bak")
+                sourceSets << additionalSourceSet
             }
         }
 
-        cloverSourceSets
+        sourceSets
     }
 
     private Set<CloverSourceSet> getTestSourceSets(Project project, CloverPluginConvention cloverPluginConvention) {
-        def cloverSourceSets = []
+        def testSourceSets = []
 
         if(hasGroovyPlugin(project)) {
             CloverSourceSet cloverSourceSet = new CloverSourceSet()
@@ -213,27 +210,24 @@ class CloverPlugin implements Plugin<Project> {
             cloverSourceSet.srcDirs.addAll(filterNonExistentDirectories(project.sourceSets.test.groovy.srcDirs))
             cloverSourceSet.classesDir = project.sourceSets.test.output.classesDir
             cloverSourceSet.backupDir = cloverPluginConvention.testClassesBackupDir ?: new File("${project.sourceSets.test.output.classesDir}-bak")
-            cloverSourceSets << cloverSourceSet
+            testSourceSets << cloverSourceSet
         }
         else if(hasJavaPlugin(project)) {
             CloverSourceSet cloverSourceSet = new CloverSourceSet()
             cloverSourceSet.srcDirs.addAll(filterNonExistentDirectories(project.sourceSets.test.java.srcDirs))
             cloverSourceSet.classesDir = project.sourceSets.test.output.classesDir
             cloverSourceSet.backupDir = cloverPluginConvention.testClassesBackupDir ?: new File("${project.sourceSets.test.output.classesDir}-bak")
-            cloverSourceSets << cloverSourceSet
+            testSourceSets << cloverSourceSet
         }
 
         if(cloverPluginConvention.additionalTestSourceSets) {
-            cloverPluginConvention.additionalTestSourceSets.each {
-                CloverSourceSet cloverSourceSet = new CloverSourceSet()
-                cloverSourceSet.srcDirs.addAll(filterNonExistentDirectories(it.srcDirs))
-                cloverSourceSet.classesDir = it.output.classesDir
-                cloverSourceSet.backupDir = cloverPluginConvention.classesBackupDir ?: new File("${it.output.classesDir}-bak")
-                cloverSourceSets << cloverSourceSet
+            cloverPluginConvention.additionalTestSourceSets.each { additionalTestSourceSet ->
+                additionalTestSourceSet.backupDir = cloverPluginConvention.classesBackupDir ?: new File("${additionalTestSourceSet.classesDir}-bak")
+                testSourceSets << additionalTestSourceSet
             }
         }
 
-        cloverSourceSets
+        testSourceSets
     }
 
     private Set<File> filterNonExistentDirectories(Set<File> dirs) {
