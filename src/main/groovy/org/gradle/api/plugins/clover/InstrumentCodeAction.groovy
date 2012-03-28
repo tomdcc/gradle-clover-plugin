@@ -19,6 +19,7 @@ import groovy.util.logging.Slf4j
 import org.gradle.api.Action
 import org.gradle.api.Task
 import org.gradle.api.file.FileCollection
+import org.gradle.api.plugins.clover.util.CloverSourceSetUtils
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
@@ -71,8 +72,8 @@ class InstrumentCodeAction implements Action<Task> {
             ant.property(name: 'clover.license.path', value: getLicenseFile().canonicalPath)
             ant."clover-clean"(initString: "${getBuildDir()}/${getInitString()}")
 
-            List<File> srcDirs = getSourceDirs(getSourceSets())
-            List<File> testSrcDirs = getSourceDirs(getTestSourceSets())
+            List<File> srcDirs = CloverSourceSetUtils.getSourceDirs(getSourceSets())
+            List<File> testSrcDirs = CloverSourceSetUtils.getSourceDirs(getTestSourceSets())
             
             ant.'clover-setup'(initString: "${getBuildDir()}/${getInitString()}") {
                 srcDirs.each { srcDir ->
@@ -118,16 +119,6 @@ class InstrumentCodeAction implements Action<Task> {
             log.info 'Finished instrumenting code using Clover.'
         }
     }
-
-    private List<File> getSourceDirs(Set<CloverSourceSet> sourceSets) {
-        def srcDirs = []
-
-        sourceSets.each { sourceSet ->
-            srcDirs.addAll(sourceSet.srcDirs)
-        }
-
-        srcDirs
-    }
     
     private void moveOriginalClasses(AntBuilder ant) {
         moveClassesDirsToBackupDirs(ant, getSourceSets())
@@ -136,7 +127,7 @@ class InstrumentCodeAction implements Action<Task> {
     
     private void moveClassesDirsToBackupDirs(AntBuilder ant, Set<CloverSourceSet> sourceSets) {
         sourceSets.each { sourceSet ->
-            if(sourceSet.classesDir && sourceSet.classesDir.exists()) {
+            if(CloverSourceSetUtils.existsDirectory(sourceSet.classesDir)) {
                 ant.move(file: sourceSet.classesDir.canonicalPath, tofile: sourceSet.backupDir.canonicalPath, failonerror: true)
             }
         }
@@ -158,7 +149,7 @@ class InstrumentCodeAction implements Action<Task> {
     
     private void copyResourceFilesToBackupDirs(AntBuilder ant, Set<CloverSourceSet> sourceSets) {
         sourceSets.each { sourceSet ->
-            if(sourceSet.backupDir && sourceSet.backupDir.exists()) {
+            if(CloverSourceSetUtils.existsDirectory(sourceSet.backupDir)) {
                 ant.copy(todir: sourceSet.classesDir.canonicalPath, failonerror: true) {
                     fileset(dir: sourceSet.backupDir.canonicalPath, excludes: '**/*.class')
                 }

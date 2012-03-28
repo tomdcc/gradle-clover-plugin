@@ -17,6 +17,7 @@ package org.gradle.api.plugins.clover
 
 import groovy.util.logging.Slf4j
 import org.gradle.api.file.FileCollection
+import org.gradle.api.plugins.clover.util.CloverSourceSetUtils
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.TaskAction
@@ -120,15 +121,17 @@ class GenerateCoverageReportTask extends CloverReportTask {
     }
 
     private void moveBackupToClassesDir(File backupDir, File classesDir) {
-        if(backupDir && backupDir.exists()) {
+        if(CloverSourceSetUtils.existsDirectory(backupDir)) {
             ant.move(file: backupDir.canonicalPath, tofile: classesDir.canonicalPath, failonerror: true)
         }
     }
 
     private void writeReport(String outfile, String type) {
+        List<File> testSrcDirs = CloverSourceSetUtils.getSourceDirs(getTestSourceSets())
+
         ant."clover-report"(initString: "${getBuildDir()}/${getInitString()}") {
             current(outfile: outfile, title: getProjectName()) {
-                getTestSourceSets().collect { it.srcDirs }.each { testSrcDir ->
+                testSrcDirs.each { testSrcDir ->
                     ant.testsources(dir: testSrcDir) {
                         getTestIncludes().each { include ->
                             ant.include(name: include)
