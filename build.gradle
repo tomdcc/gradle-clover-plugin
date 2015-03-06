@@ -1,23 +1,12 @@
-buildscript {
-    repositories {
-        maven { url 'http://jcenter.bintray.com' }
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.6'
-        //classpath 'org.gradle.api.plugins:gradle-clover-plugin:0.8'
-    }
+plugins {
+  id "com.gradle.publish" version "0.9.7"
 }
 
 apply plugin: 'groovy'
 apply plugin: 'idea'
-apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
-//apply plugin: 'clover'
 
 group = 'com.bmuschko'
-version = '2.0.1'
+version = '2.0.2'
 defaultTasks 'clean', 'build'
 
 sourceSets {
@@ -108,67 +97,16 @@ artifacts {
     archives javadocJar
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            artifact sourcesJar
-            artifact groovydocJar
-            artifact javadocJar
-
-            pom.withXml {
-                def root = asNode()
-                root.appendNode('name', 'Gradle Clover plugin')
-                root.appendNode('description', 'Gradle plugin for generating a code coverage report using Clover.')
-                root.appendNode('url', 'https://github.com/bmuschko/gradle-clover-plugin')
-                root.appendNode('inceptionYear', '2012')
-
-                def scm = root.appendNode('scm')
-                scm.appendNode('url', 'https://github.com/bmuschko/gradle-clover-plugin')
-                scm.appendNode('connection', 'scm:https://bmuschko@github.com/bmuschko/gradle-clover-plugin.git')
-                scm.appendNode('developerConnection', 'scm:git://github.com/bmuschko/gradle-clover-plugin.git')
-
-                def license = root.appendNode('licenses').appendNode('license')
-                license.appendNode('name', 'The Apache Software License, Version 2.0')
-                license.appendNode('url', 'http://www.apache.org/licenses/LICENSE-2.0.txt')
-                license.appendNode('distribution', 'repo')
-
-                def developers = root.appendNode('developers')
-                def bmuschko = developers.appendNode('developer')
-                bmuschko.appendNode('id', 'bmuschko')
-                bmuschko.appendNode('name', 'Benjamin Muschko')
-                bmuschko.appendNode('email', 'benjamin.muschko@gmail.com')
-            }
-        }
-    }
-}
-
-bintray {
-    user = project.hasProperty('bintrayUser') ? project.getProperty('bintrayUser') : null
-    key =  project.hasProperty('bintrayKey') ? project.getProperty('bintrayKey') : null
-    publications = ['mavenJava']
-
-    pkg {
-        repo = 'gradle-plugins'
-        name = 'com.bmuschko:gradle-clover-plugin'
-        desc = 'Gradle plugin for generating a code coverage report using Clover.'
-        websiteUrl = "https://github.com/bmuschko/${project.name}"
-        issueTrackerUrl = "https://github.com/bmuschko/${project.name}/issues"
-        vcsUrl = "https://github.com/bmuschko/${project.name}.git"
-        licenses = ['Apache-2.0']
-        labels = ['gradle', 'code', 'coverage', 'metrics', 'test', 'report', 'clover']
-        publicDownloadNumbers = true
-
-        version {
-            vcsTag = "v$project.version"
-            attributes = ['gradle-plugin': "com.bmuschko.clover:${project.group}:${project.name}"]
-
-            gpg {
-                sign = true
-                passphrase = project.hasProperty('gpgPassphrase') ? project.getProperty('gpgPassphrase') : null
-            }
-        }
-    }
+pluginBundle {
+	description = 'Gradle plugin for generating a code coverage report using Clover.'
+	website = 'https://github.com/bmuschko/gradle-clover-plugin'
+	vcsUrl = 'https://github.com/bmuschko/gradle-clover-plugin'
+	plugins {
+		clover {
+			id = 'com.bmuschko.clover'
+			displayName = 'Gradle Clover plugin'
+		}
+	}
 }
 
 task wrapper(type: Wrapper) {
